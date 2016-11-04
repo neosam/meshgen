@@ -1,10 +1,9 @@
-use std::rc::Rc;
-use vertex::Vertex;
 use base::{Identifier, Id};
 
+#[derive(Clone, Debug)]
 pub struct Face {
 	id: Identifier,
-	pub vertices: Vec<Rc<Vertex>>
+	pub vertices: Vec<Identifier>
 }
 
 impl Id for Face {
@@ -12,7 +11,7 @@ impl Id for Face {
 }
 
 impl Face {
-	pub fn new(id: Identifier, vertices: Vec<Rc<Vertex>>) -> Face {
+	pub fn new(id: Identifier, vertices: Vec<Identifier>) -> Face {
 		Face {
 			id: id,
 			vertices: vertices
