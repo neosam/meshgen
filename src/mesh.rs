@@ -52,11 +52,17 @@ impl Mesh {
 	pub fn get_vertex(&self, id: Identifier) -> Option<&Vertex> {
 		self.vertices.get(&id)
 	}
+	pub fn get_vertex_mut(&mut self, id: Identifier) -> Option<&mut Vertex> {
+		self.vertices.get_mut(&id)
+	}
 	pub fn get_vertex_clone(&self, id: Identifier) -> Option<Vertex> {
 		self.get_vertex(id).and_then(|v| Some(v.clone()))
 	}
 	pub fn get_face(&self, id: Identifier) -> Option<&Face> {
 		self.faces.get(&id)
+	}
+	pub fn get_face_mut(&mut self, id: Identifier) -> Option<&mut Face> {
+		self.faces.get_mut(&id)
 	}
 	pub fn get_face_clone(&self, id: Identifier) -> Option<Face> {
 		self.get_face(id).and_then(|f| Some(f.clone()))
@@ -99,9 +105,8 @@ impl Mesh {
 
 			/* Create the new vertices of the extruded face and move them */
 			let new_vertices = self.duplicate_vertices(&face.vertices);
-			self.transform_vertices(new_vertices.as_slice(), | mut vertex | {
+			self.transform_vertices(new_vertices.as_slice(), | vertex | {
 				vertex.add_to(v);
-				vertex
 			});
 
 			/* Building the side faces */
@@ -143,17 +148,12 @@ impl Mesh {
 	}
 
 	pub fn transform_vertices<F>(&mut self, ids: &[Identifier], f: F) 
-			where F: Fn(Vertex) -> Vertex {
+			where F: Fn(&mut Vertex) {
 		for id in ids {
-			let vertex_in = {
-				let vertex_in_option = self.get_vertex(*id);
-				if vertex_in_option.is_none() {
-					continue;
-				}
-				vertex_in_option.unwrap().clone()
-			};
-			let vertex_out = f(vertex_in);
-			self.update_vertex(&vertex_out);
+			self.get_vertex_mut(*id).and_then(|vertex| {
+				f(vertex);
+				Some(())
+			});
 		}
 	}
 }
