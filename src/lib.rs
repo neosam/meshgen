@@ -4,6 +4,7 @@
 //! the procedural way.
 
 pub mod base;
+pub mod matrix;
 pub mod vector;
 pub mod vertex;
 pub mod face;

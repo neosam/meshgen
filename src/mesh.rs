@@ -188,6 +188,18 @@ impl Mesh {
 			});
 		}
 	}
+
+	pub fn transform_vertices_to_point<F, V: Vector>(&mut self, v: &V, ids: &[Identifier], f: F) 
+			where F: Fn(&mut Vertex) {
+		for id in ids {
+			self.get_vertex_mut(*id).and_then(|vertex| {
+				vertex.sub_from(v);
+				f(vertex);
+				vertex.add_to(v);
+				Some(())
+			});
+		}
+	}
 }
 
 impl Default for Mesh {
