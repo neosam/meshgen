@@ -15,6 +15,32 @@ pub trait Vector {
 		self.set_y(y + v.get_y());
 		self.set_z(z + v.get_z());
 	}
+
+	fn cross_prod_to<V: Vector>(&mut self, v: &V) {
+		let x = self.get_y() * v.get_z() - v.get_y() * self.get_z();
+		let y = self.get_z() * v.get_x() - v.get_z() * self.get_x();
+		let z = self.get_x() * v.get_y() - v.get_x() * self.get_y();
+		self.set_x(x);
+		self.set_y(y);
+		self.set_z(z);
+	}
+
+	fn length(&self) -> f32 {
+		let sum = self.get_x() * self.get_x()
+					+ self.get_y() * self.get_y()
+					+ self.get_z() * self.get_z();
+		sum.sqrt()
+	}
+
+	fn normalize(&mut self) {
+		let length = self.length();
+		let x = self.get_x();
+		let y = self.get_y();
+		let z = self.get_z();
+		self.set_x(x / length);
+		self.set_y(y / length);
+		self.set_z(z / length);
+	} 
 }
 
 #[derive(Debug)]

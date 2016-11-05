@@ -1,14 +1,14 @@
 use face::Face;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use vertex::Vertex;
 use vector::Vector;
 use base::*;
 
 pub struct Mesh {
 	id_counter: Identifier,
-	faces: BTreeMap<Identifier, Face>,
-	vertices: BTreeMap<Identifier, Vertex>,
-	vertex_face_map: BTreeMap<Identifier, Vec<Identifier>>
+	faces: HashMap<Identifier, Face>,
+	vertices: HashMap<Identifier, Vertex>,
+	vertex_face_map: HashMap<Identifier, Vec<Identifier>>
 }
 
 pub struct ExtrudeResult {
@@ -162,9 +162,9 @@ impl Default for Mesh {
 	fn default() -> Mesh {
 		Mesh {
 			id_counter: 0,
-			faces: BTreeMap::new(),
-			vertices: BTreeMap::new(),
-			vertex_face_map: BTreeMap::new()
+			faces: HashMap::new(),
+			vertices: HashMap::new(),
+			vertex_face_map: HashMap::new()
 		}
 	}
 }
