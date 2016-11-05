@@ -99,6 +99,26 @@ impl Mesh {
 		}
 	}
 
+	pub fn face_normal(&self, face_id: Identifier) -> Vertex {
+		let face = self.get_face(face_id).unwrap().clone();
+		let v1 = self.get_vertex(face.vertices[0]).unwrap();
+		let v2 = self.get_vertex(face.vertices[1]).unwrap();
+		let v3 = self.get_vertex(face.vertices[2]).unwrap();
+		let mut edge1 = v2.clone();
+		edge1.sub_from(v1);
+		let mut edge2 = v3.clone();
+		edge2.sub_from(v2);
+		edge1.cross_prod_to(&edge2);
+		edge1.normalize();
+		edge1
+	}
+
+	pub fn extrude_face_normal(&mut self, face_id: Identifier, length: f32) -> Option<ExtrudeResult> {
+		let mut face_normal = self.face_normal(face_id);
+		face_normal.mult_scalar_to(length);
+		self.extrude_face(face_id, &face_normal)
+	}
+
 	pub fn extrude_face<V: Vector>(&mut self, face_id: Identifier, v: &V) -> Option<ExtrudeResult> {
 		/* Get the vertices */
 		self.get_face_clone(face_id).and_then(|face| {
@@ -223,9 +243,8 @@ fn test() {
 	let extrude_result2 = mesh.extrude_face(
 		extrude_result.top_face, 
 		&VectorImpl::new(1f32, 0f32, 3f32)).unwrap();
-	mesh.extrude_face(
-		extrude_result.side_faces[0], 
-		&VectorImpl::new(0f32, -1f32, 0f32)).unwrap();
+	mesh.extrude_face_normal(
+		extrude_result.side_faces[0], 3f32).unwrap();
 	assert_eq!(4, extrude_result.side_faces.len());
 	assert_eq!(13, mesh.all_faces().len());
 
