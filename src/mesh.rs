@@ -1,8 +1,10 @@
 use face::Face;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use vertex::Vertex;
 use vector::Vector;
 use base::*;
+
 
 pub struct Mesh {
 	id_counter: Identifier,
@@ -147,6 +149,16 @@ impl Mesh {
 		self.faces.values().map(|x| x.clone()).collect()
 	}
 
+	pub fn all_vertices(&self) -> Vec<Identifier> {
+		let mut vertices: HashSet<Identifier> = HashSet::new();
+		for face in self.all_faces().iter() {
+			for identifier in face.vertices.iter() {
+				vertices.insert(*identifier);
+			}
+		}
+		vertices.iter().map(|x| x.clone()).collect()
+	}
+
 	pub fn transform_vertices<F>(&mut self, ids: &[Identifier], f: F) 
 			where F: Fn(&mut Vertex) {
 		for id in ids {
@@ -172,6 +184,8 @@ impl Default for Mesh {
 #[test]
 fn test() {
 	use vector::VectorImpl;
+	use wavefrontexport::export_wavefront;
+	use std::fs::File;
 
 	let mut mesh = Mesh::default();
 	assert_eq!(0, mesh.all_faces().len());
@@ -199,12 +213,25 @@ fn test() {
 	assert_eq!(0f32, mesh.get_vertex(v1).unwrap().x);
 
 	let extrude_result = mesh.extrude_face(f, &VectorImpl::new(0f32, 0f32, 1f32)).unwrap();
+	{
+		let top_face = mesh.get_face(extrude_result.top_face).unwrap();
+		assert_eq!(1f32, mesh.get_vertex(top_face.vertices[0]).unwrap().z);
+		assert_eq!(1f32, mesh.get_vertex(top_face.vertices[1]).unwrap().z);
+		assert_eq!(1f32, mesh.get_vertex(top_face.vertices[2]).unwrap().z);
+		assert_eq!(1f32, mesh.get_vertex(top_face.vertices[3]).unwrap().z);
+	}
+	let extrude_result2 = mesh.extrude_face(
+		extrude_result.top_face, 
+		&VectorImpl::new(1f32, 0f32, 3f32)).unwrap();
+	mesh.extrude_face(
+		extrude_result.side_faces[0], 
+		&VectorImpl::new(0f32, -1f32, 0f32)).unwrap();
 	assert_eq!(4, extrude_result.side_faces.len());
-	assert_eq!(5, mesh.all_faces().len());
-	let top_face = mesh.get_face(extrude_result.top_face).unwrap();
-	assert_eq!(1f32, mesh.get_vertex(top_face.vertices[0]).unwrap().z);
-	assert_eq!(1f32, mesh.get_vertex(top_face.vertices[1]).unwrap().z);
-	assert_eq!(1f32, mesh.get_vertex(top_face.vertices[2]).unwrap().z);
-	assert_eq!(1f32, mesh.get_vertex(top_face.vertices[3]).unwrap().z);
+	assert_eq!(13, mesh.all_faces().len());
+
+	mesh.gen_face(ids.as_slice());
+
+	let mut wavefront = File::create("export.obj").unwrap();
+	export_wavefront(&mesh, &mut wavefront);
 }
 

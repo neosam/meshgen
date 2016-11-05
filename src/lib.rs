@@ -8,6 +8,7 @@ pub mod vector;
 pub mod vertex;
 pub mod face;
 pub mod mesh;
+pub mod wavefrontexport;
 
 #[cfg(test)]
 mod tests {
